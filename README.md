@@ -1,97 +1,84 @@
-# 🐾 Cat vs. Dog Image Classifier
+# 🐾 Cats vs Dogs Classification with CNN
 
-A simple Convolutional Neural Network (CNN) built with PyTorch to classify images of cats and dogs using the [Microsoft PetImages dataset](https://www.microsoft.com/en-us/download/details.aspx?id=54765). Trained on a curated subset of 500 valid samples with early stopping for efficient performance.
+This project demonstrates how to build a convolutional neural network (CNN) using TensorFlow and Keras to classify images of cats and dogs.
 
----
+## 📦 Dataset
 
-## 🧠 Features
+- Source: [Cats and Dogs Filtered Dataset](https://storage.googleapis.com/mledu-datasets/cats_and_dogs_filtered.zip)
+- Structure:
+  - `/train/cats/`
+  - `/train/dogs/`
+  - Images are extracted to: `~/.keras/datasets/cats_and_dogs_filtered`
 
-- CNN-based binary image classification (Cat 🐱 vs Dog 🐶)
-- Handles corrupted images gracefully
-- Uses only the first 500 valid samples for fast training
-- Train/validation split using `scikit-learn`
-- Early stopping based on validation accuracy
-- Image prediction with live output
-
----
-
-## 📁 Dataset Structure
-
-Expected folder structure:
-
-```
-PetImages/
-├── Cat/
-│   └── *.jpg
-├── Dog/
-│   └── *.jpg
-```
-
-You can download the dataset from [here](https://www.microsoft.com/en-us/download/details.aspx?id=54765) and place it in the project root.
-
----
-
-## 🚀 Setup Instructions
-
-1. Clone the repo and install dependencies:
+## 🛠️ Setup
 
 ```bash
-pip install torch torchvision scikit-learn pillow
+pip install tensorflow pandas numpy matplotlib
 ```
 
-2. Download the PetImages dataset and unzip it in the project folder.
+## 📁 Directory Split
 
-3. Run the training script:
-
-```bash
-python your_script_name.py
-```
-
----
-
-## 🔮 Predict New Images
-
-To predict a new image using the trained model:
+Using `image_dataset_from_directory` to split training and validation data:
 
 ```python
-# Load model
-model = CatDogCNN().to(DEVICE)
-model.load_state_dict(torch.load("catdog_model_light.pth"))
-model.eval()
-
-# Predict
-predict_image("test_image.jpg", model)
+image_dataset_from_directory(
+    base_dir,
+    image_size=(200, 200),
+    validation_split=0.1,
+    subset='training' / 'validation',
+    seed=1,
+    batch_size=32
+)
 ```
 
-Ensure `test_image.jpg` is a clean image of a cat or dog!
+## 🧠 Model Architecture
 
----
+Sequential CNN with multiple convolution and pooling layers:
 
-## 🛠 Architecture
+- Conv2D ➝ MaxPooling ➝ Flatten
+- Dense ➝ BatchNormalization ➝ Dropout
+- Final layer with `sigmoid` activation for binary classification
 
-```text
-Input: RGB image resized to 150x150
-→ Conv2D (32 filters) → ReLU → MaxPool
-→ Conv2D (64 filters) → ReLU → MaxPool
-→ Conv2D (128 filters) → ReLU → MaxPool
-→ Flatten
-→ Linear → ReLU
-→ Output (2 classes: Cat, Dog)
+## ⚙️ Compilation & Training
+
+```python
+model.compile(
+    loss='binary_crossentropy',
+    optimizer='adam',
+    metrics=['accuracy']
+)
+model.fit(train_data, epochs=10, validation_data=val_data)
 ```
 
+## 📊 Evaluation
+
+Training and validation accuracy/loss curves are plotted using Matplotlib.
+
+## 🔍 Prediction
+
+Function `predict_image(image_path)` loads and predicts if the input is a **cat** or a **dog**:
+
+```python
+img = image.load_img(image_path, target_size=(200, 200))
+img_array = image.img_to_array(img)
+img_array = np.expand_dims(img_array, axis=0)
+model.predict(img_array)
+```
+
+## 📷 Sample Predictions
+
+```python
+predict_image('/path/to/cat.jpg')
+predict_image('/path/to/dog.jpg')
+```
+
+## 🚀 Future Improvements
+
+- Add data augmentation for robustness
+- Use pretrained models like EfficientNet for higher accuracy
+- Include EarlyStopping and LearningRateScheduler for smarter training
+
 ---
 
-## ✨ Future Ideas
-
-- Add data augmentation (flip, rotate, shift)
-- Use dropout to reduce overfitting
-- Streamlit UI for live image uploads and predictions
-- Training progress visualization with `matplotlib` or `wandb`
-
----
-
-## 👤 Author
-
-Built with 💻, 🧠, and a love for furry friends.
-
+Built with 💙 using TensorFlow + Keras. Happy coding!
 ```
