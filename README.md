@@ -1,84 +1,61 @@
-# 🐾 Cats vs Dogs Classification with CNN
+# 🐾 Cats vs Dogs Image Classification with TensorFlow
 
-This project demonstrates how to build a convolutional neural network (CNN) using TensorFlow and Keras to classify images of cats and dogs.
+This project builds a convolutional neural network (CNN) using TensorFlow and Keras to classify images of cats and dogs. It features a full pipeline from dataset preprocessing to model training, early stopping based on validation accuracy, and final predictions on test images.
 
 ## 📦 Dataset
 
-- Source: [Cats and Dogs Filtered Dataset](https://storage.googleapis.com/mledu-datasets/cats_and_dogs_filtered.zip)
-- Structure:
-  - `/train/cats/`
-  - `/train/dogs/`
-  - Images are extracted to: `~/.keras/datasets/cats_and_dogs_filtered`
-
-## 🛠️ Setup
-
-```bash
-pip install tensorflow pandas numpy matplotlib
-```
-
-## 📁 Directory Split
-
-Using `image_dataset_from_directory` to split training and validation data:
-
-```python
-image_dataset_from_directory(
-    base_dir,
-    image_size=(200, 200),
-    validation_split=0.1,
-    subset='training' / 'validation',
-    seed=1,
-    batch_size=32
-)
-```
+- Source: [Cats and Dogs Filtered](https://storage.googleapis.com/mledu-datasets/cats_and_dogs_filtered.zip)
+- Automatically downloaded and extracted to: `~/.keras/datasets/cats_and_dogs_filtered`
+- Contains separate folders for training images of cats and dogs.
 
 ## 🧠 Model Architecture
 
-Sequential CNN with multiple convolution and pooling layers:
+A Sequential CNN consisting of:
 
-- Conv2D ➝ MaxPooling ➝ Flatten
-- Dense ➝ BatchNormalization ➝ Dropout
-- Final layer with `sigmoid` activation for binary classification
+- 4 Convolutional layers with ReLU activation and MaxPooling
+- Flattening layer for transition to dense layers
+- Multiple fully connected Dense layers with:
+  - Batch Normalization
+  - Dropout regularization
+- Output layer with Sigmoid activation for binary classification
 
-## ⚙️ Compilation & Training
+## ⚙️ Training Strategy
 
-```python
-model.compile(
-    loss='binary_crossentropy',
-    optimizer='adam',
-    metrics=['accuracy']
-)
-model.fit(train_data, epochs=10, validation_data=val_data)
-```
+- Uses `image_dataset_from_directory` with a 10% validation split.
+- Trained using `model.fit()` for up to 100 epochs.
+- Implements **custom early stopping**:
+  - Stops training when validation accuracy doesn't improve for 5 consecutive epochs.
+  - Automatically restores best weights after stopping.
 
-## 📊 Evaluation
+## 📊 Visualization
 
-Training and validation accuracy/loss curves are plotted using Matplotlib.
-
-## 🔍 Prediction
-
-Function `predict_image(image_path)` loads and predicts if the input is a **cat** or a **dog**:
+Plots the training and validation accuracy/loss over time using Matplotlib:
 
 ```python
-img = image.load_img(image_path, target_size=(200, 200))
-img_array = image.img_to_array(img)
-img_array = np.expand_dims(img_array, axis=0)
-model.predict(img_array)
+history_df[['loss', 'val_loss']].plot()
+history_df[['accuracy', 'val_accuracy']].plot()
 ```
 
-## 📷 Sample Predictions
+## 🐾 Prediction Function
+
+Includes a custom prediction function that loads and preprocesses an image, runs inference, and outputs whether the image is classified as a cat or a dog:
 
 ```python
-predict_image('/path/to/cat.jpg')
-predict_image('/path/to/dog.jpg')
+def predict_image(image_path):
+    img = load_img(image_path, target_size=(200, 200))
+    img_array = img_to_array(img)
+    img_array = np.expand_dims(img_array, axis=0)
+    result = model.predict(img_array)
+    print("Dog 🐶" if result >= 0.5 else "Cat 🐱")
 ```
 
-## 🚀 Future Improvements
+## 🚀 Highlights
 
-- Add data augmentation for robustness
-- Use pretrained models like EfficientNet for higher accuracy
-- Include EarlyStopping and LearningRateScheduler for smarter training
+- Stops training automatically at peak validation accuracy.
+- Full training history recorded and visualized.
+- Project structure allows easy scalability or transfer learning.
 
 ---
 
-Built with 💙 using TensorFlow + Keras. Happy coding!
+Built using 💙 TensorFlow and Python. Ideal for anyone learning image classification or experimenting with CNN optimization.
 ```
